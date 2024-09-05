@@ -11,7 +11,7 @@ but the main thing to remember here is that your application is impressive enoug
 
 ## Now, let's get to it:
 
-I've forked your repository and I'll make some changes in some of the files, so that you can see how I would write them.
+I've forked your repository and I've made some changes in some of the files, so that you can see how I would write them.
 
 The first thing I've noticed was you're using Java conventions instead of C# conventions. 
 It's important to follow the conventions according to the language you're developing in, 
@@ -47,7 +47,7 @@ so I've changed `getProtectedPieces` and `setProtectedPieces` methods to a simpl
 I haven't changed the other getters and setters, though, just this one. 
 Also, I've noticed that `getPossibleMovesCount` and `setPossibleMovesCount` both have zero references, but I didn't delete them just yet because I didn't know if you wanted them for future use. 
 
-#### Adding regions
+#### Added regions
 This is actually a personal preference. Visual Studio allows you to have code regions. In my opinion, this helps a lot in classes where you have a lot of code,
 since regions are collapsible.  
 
@@ -105,7 +105,7 @@ you can simply go to the relevant instance of `PlayerPieces` and use its `King` 
 This also means you don't actually need the _whiteKing and _blackKing fields, you can use _whitePieces.King and _blackPieces.King instead.
 However, it's not uncommon to use fields or variables as references for longer, more cumbersome names, so it's up to you to decide if you want to change it.
 
-#### Rewrite piece move methods
+#### A complete rewrite of piece move methods
 I've noticed a lot of code repetition in all the different Move methods you've had,
 so I've decided to create a single private method called `Move`, and have all the public methods call it instead.
 I've started with a rather cumbersome implementation but ended up with a simple, elegant and most importantly - safe implementation.
