@@ -67,7 +67,7 @@ This is an anti-pattern mainly because it's error-prone and compilers will not c
 Using Color.White and Color.Black instead of "White" and "Black" means you leverage both IntelliSense and compiler to help you avoid such mistakes.
 
 #### Removed the name variable from constructors of all pieces
-Instead, when calling the (now abstract) base class, provided the name of the piece based on the name of the class - (i.e  `:base(nameof(Queen), Color.Black...)`)
+Instead, when calling the (now abstract) base class constructor, provided the name of the piece based on the name of the class - (i.e  `:base(nameof(Queen), Color.Black...)`)
 This again reduces the chances of typos and also removes redundant repetition when constructing the pieces in the game class.
 
 #### Removed redundant fields
