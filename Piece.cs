@@ -1,273 +1,168 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
 namespace ChessApp
 {
-    internal class Piece
+    public enum Color
     {
-            // Fields
-            protected string name;
-            protected string color;
-            protected int row;
-            protected int col;
-            protected String[] allPossibleMoves = [];
-            protected int possibleMovesCount = 0;
-            protected String[] protectedPieces = [];
+        Black,
+        White
+    }
 
-            // Constructor to initialize the piece with name, color, row, and column
-            public Piece(String name, String color, int row, int col)
-            {
-                this.name = name;
-                this.color = color;
-                this.row = row;
-                this.col = col;
-            }
+    internal abstract class Piece
+    {
+        // Fields
+        protected string _name;
+        protected Color _color;
+        protected int _row;
+        protected int _col;
+        protected string[] _allPossibleMoves;
+        protected int _possibleMovesCount;
 
-            //Getters + Setters to all the fields
-            public void setProtectedPieces(String[] protectedPieces)
-            {
-                this.protectedPieces = protectedPieces;
-            }
+        // Constructor to initialize the piece with name, color, row, and column
+        protected Piece(string name, Color color, int row, int col)
+        {
+            _name = name;
+            _color = color;
+            _row = row;
+            _col = col;
+            _allPossibleMoves = [];
+            _possibleMovesCount = 0;
+            ProtectedPieces = [];
+        }
 
-            public String[] getProtectedPieces()
-            {
-                return protectedPieces;
-            }
+        #region properties 
 
-            public void setAllPossibleMove(String[] moves)
-            {
-                allPossibleMoves = moves;
-            }
+        public string[] ProtectedPieces { get; set; }
 
-            public int getPossibleMovesCount()
-            {
-                return possibleMovesCount;
-            }
+        public void setAllPossibleMove(string[] moves) => _allPossibleMoves = moves;
 
-            public void setPossibleMovesCount(int possibleMovesCount)
-            {
-                this.possibleMovesCount = possibleMovesCount;
-            }
+        public int getPossibleMovesCount() => _possibleMovesCount;
 
-            public String[] getAllPossibleMoves()
-            {
-                return allPossibleMoves;
-            }
+        public void setPossibleMovesCount(int possibleMovesCount) => _possibleMovesCount = possibleMovesCount;
 
-            public String getName()
-            {
-                return name;
-            }
+        public string[] getAllPossibleMoves() => _allPossibleMoves;
 
-            public String getColor()
-            {
-                return color;
-            }
-            public int getRow()
-            {
-                return row;
-            }
+        public string getName() => _name;
 
-            public int getCol()
-            {
-                return col;
-            }
+        public Color getColor() => _color;
 
-            public void setRow(int row)
-            {
-            this.row = row;
-            }
+        public int getRow() => _row;
 
-            public void setCol(int col)
-            {
-                this.col = col;
-            }
+        public int getCol() => _col;
 
+        public void setRow(int row) => _row = row;
 
-            // Virtual function , that each of derived classes will override as needed
-            public virtual void searchForPossibleMoves(Piece basePiece, Piece[,] theBoard, String lastMove)
+        public void setCol(int col) => _col = col;
+
+        #endregion properties 
+
+        // Virtual function , that each of derived classes will override as needed
+        public abstract void SearchForPossibleMoves(Piece basePiece, Piece[,] theBoard, string lastMove);
+
+        // Adding a square to the piece moves list based on it status
+        public bool AddSquareToPossibleMoves(Piece[,] board, int squareRow, int squareColumn,
+            string[] moves, int movesNumber, string[] protectedSquares, int protectedSquaresCount)
+        {
+            Piece currPiece = board[squareRow, squareColumn];
+            // If the square is empty add move to list
+            if (currPiece == null)
             {
+                AddPossibleMove(squareRow, squareColumn, moves, movesNumber);
 
             }
-
-            // Adding a square to the piece moves list based on it status
-            public bool addSquareToPossibleMoves(Piece[,] board, int squareRow, int squareColumn,
-                String[] moves,int movesNumber, String[] protectedSquares, int protectedSquaresCount)
+            // If square is occupied by an opponent's piece, add it to list and stop checking this direction
+            else if (currPiece._color != _color)
             {
-                Piece currPiece = board[squareRow, squareColumn];
-                // If the square is empty add move to list
-                if (currPiece == null)
-                {
-                    addPossibleMove(squareRow, squareColumn, moves, movesNumber);
+                AddPossibleMove(squareRow, squareColumn, moves, movesNumber);
+                return false;
+            }
+            else
+            {
+                // If the square is occupied by a piece of the same color, add it to protected squares
+                AddPossibleMove(squareRow, squareColumn, protectedSquares, protectedSquaresCount);
+                return false;
+            }
+            return true;
+        }
 
-                }
-                // If square is occupied by an opponent's piece, add it to list and stop checking this direction
-                else if (currPiece.color != color)
-                {
-                    addPossibleMove(squareRow, squareColumn, moves, movesNumber);
-                    return false;
-                }
+        // Checks and adds optional rightward moves for the current chess piece
+        public void RightMove(Piece[,] board, string[] moves, string[] protectedSquares) => Move(board, moves, protectedSquares, Direction.Right);
+        // Checks and adds optional leftward moves for the current chess piece
+        public void LeftMove(Piece[,] board, string[] moves, string[] protectedSquares) => Move(board, moves, protectedSquares, Direction.Left);
+        // Checks and adds optional upward moves for the current chess piece
+        public void UpMove(Piece[,] board, string[] moves, string[] protectedSquares) => Move(board, moves, protectedSquares, Direction.Up);
+
+        // Checks and adds optional downward moves for the current chess piece
+        public void DownMove(Piece[,] board, string[] moves, string[] protectedSquares) => Move(board, moves, protectedSquares, Direction.Down);
+
+        // Checks and adds optional top-right diagonal moves for the current chess piece
+        public void UpRightMove(Piece[,] board, string[] moves, string[] protectedSquares) => Move(board, moves, protectedSquares, Direction.UpRight);
+
+        // Checks and adds optional top-left diagonal moves for the current chess piece
+        public void UpLeftMove(Piece[,] board, string[] moves, string[] protectedSquares) => Move(board, moves, protectedSquares, Direction.UpLeft);
+
+        // Checks and adds optional down-left diagonal moves for the current chess piece
+        public void DownLeftMove(Piece[,] board, string[] moves, string[] protectedSquares) => Move(board, moves, protectedSquares, Direction.DownLeft);
+
+        // Checks and adds optional down-right diagonal moves for the current chess piece
+        public void DownRightMove(Piece[,] board, string[] moves, string[] protectedSquares) => Move(board, moves, protectedSquares, Direction.DownRight);
+
+        private void Move(Piece[,] board, string[] moves, string[] protectedSquares, Direction direction)
+        {
+            int currentRow = _row + direction.RowIncrement;
+            int currentColumn = _col + direction.ColumnIncrement;
+            int movesNumber = ChessUtility.numOfCurrentMoves(moves);
+            int protectedSquaresCount = ChessUtility.numOfCurrentMoves(protectedSquares);
+
+            // I don't mind checking all of them even if they don't change because it simplifies the code significantly
+            while (currentRow >= 0 && currentRow < 8 && currentColumn >= 0 && currentColumn < 8)
+            {
+                if (AddSquareToPossibleMoves(board, currentRow, currentColumn, moves, movesNumber, protectedSquares, protectedSquaresCount))
+                    movesNumber++;
                 else
-                {
-                    // If the square is occupied by a piece of the same color, add it to protected squares
-                    addPossibleMove(squareRow, squareColumn, protectedSquares, protectedSquaresCount);
-                    return false;
-                }
-                return true;
-            }
-
-           // Checks and adds optional rightward moves for the current chess piece
-            public void rightMove(Piece[,] board, String[] moves, String[] protectedSquares)
-            {
-                int startRow = this.row;
-                int startCol = this.col + 1;
-                int movesNumber = ChessUtility.numOfCurrentMoves(moves);
-                int protectedSquaresCount = ChessUtility.numOfCurrentMoves(protectedSquares);
-                while (startCol < 8)
-                {
-                    if (addSquareToPossibleMoves(board, startRow, startCol, moves, movesNumber, protectedSquares, protectedSquaresCount))
-                        movesNumber++;
-                    else
-                        break;
-                    startCol += 1;
-                }
-            }
-            // Checks and adds optional leftward moves for the current chess piece
-            public void leftMove(Piece[,] board, String[] moves, String[] protectedSquares)
-            {
-                int startRow = this.row;
-                int startColumn = this.col - 1;
-                int movesNumber = ChessUtility.numOfCurrentMoves(moves);
-                int protectedSquaresCount = ChessUtility.numOfCurrentMoves(protectedSquares);
-                while (startColumn >= 0)
-                {
-                    if (addSquareToPossibleMoves(board, startRow, startColumn, moves, movesNumber, protectedSquares, protectedSquaresCount))
-                        movesNumber++;
-                    else
-                        break;
-                    startColumn -= 1;
-                }
-            }
-            // Checks and adds optional upward moves for the current chess piece
-            public void upMove(Piece[,] board, String[] moves, String[] protectedSquares)
-            {
-                int startRow = this.row + 1;
-                int startColumn = this.col;
-                int movesNumber = ChessUtility.numOfCurrentMoves(moves);
-                int protectedSquaresCount = ChessUtility.numOfCurrentMoves(protectedSquares);
-                while (startRow < 8)
-                {
-                    if (addSquareToPossibleMoves(board, startRow, startColumn, moves, movesNumber, protectedSquares, protectedSquaresCount))
-                        movesNumber++;
-                    else
-                        break;
-                    startRow += 1;
-                }
-            }
-
-            // Checks and adds optional downward moves for the current chess piece
-            public void downMove(Piece[,] board, String[] moves, String[] protectedSquares)
-            {
-                int startRow = this.row - 1;
-                int startCol = this.col;
-                int movesNumber = ChessUtility.numOfCurrentMoves(moves);
-                int protectedSquaresCount = ChessUtility.numOfCurrentMoves(protectedSquares);
-                while (startRow >= 0)
-                {
-                    if (addSquareToPossibleMoves(board, startRow, startCol, moves, movesNumber, protectedSquares, protectedSquaresCount))
-                        movesNumber++;
-                    else
-                        break;
-                    startRow -= 1;
-                }
-            }
-
-            // Checks and adds optional top-right diagonal moves for the current chess piece
-            public void upRightMove(Piece[,] board, String[] moves, String[] protectedSquares)
-            {
-                int startRow = this.row + 1;
-                int startColumn = this.col + 1;
-                int movesNumber = ChessUtility.numOfCurrentMoves(moves);
-                int protectedSquaresCount = ChessUtility.numOfCurrentMoves(protectedSquares);
-                while (startRow < 8 && startColumn < 8)
-                {
-                    if (addSquareToPossibleMoves(board, startRow, startColumn, moves, movesNumber, protectedSquares, protectedSquaresCount))
-                        movesNumber++;
-                    else
-                        break;
-                    startRow += 1;
-                    startColumn += 1;
-                }
-            }
-
-            // Checks and adds optional top-left diagonal moves for the current chess piece
-            public void upLeftMove(Piece[,] board, String[] moves, String[] protectedSquares)
-            {
-                int startRow = this.row + 1;
-                int startColumn = this.col - 1;
-                int movesNumber = ChessUtility.numOfCurrentMoves(moves);
-                int protectedSquaresCount = ChessUtility.numOfCurrentMoves(protectedSquares);
-                while (startRow < 8 && startColumn >= 0)
-                {
-                    if (addSquareToPossibleMoves(board, startRow, startColumn, moves, movesNumber, protectedSquares, protectedSquaresCount))
-                        movesNumber++;
-                    else
-                        break;
-                    startRow += 1;
-                    startColumn -= 1;
-                }
-            }
-
-            // Checks and adds optional down-left diagonal moves for the current chess piece
-            public void downLeftMove(Piece[,] board, String[] moves, String[] protectedSquares)
-            {
-                int startRow = this.row - 1;
-                int StartColumn = this.col - 1;
-                int movesNumber = ChessUtility.numOfCurrentMoves(moves);
-                int protectedSquaresCount = ChessUtility.numOfCurrentMoves(protectedSquares);
-                while (startRow >= 0 && StartColumn >= 0)
-                {
-                    if (addSquareToPossibleMoves(board, startRow, StartColumn, moves, movesNumber, protectedSquares, protectedSquaresCount))
-                        movesNumber++;
-                    else
-                        break;
-                    startRow -= 1;
-                    StartColumn -= 1;
-                }
-
-            }
-
-            // Checks and adds optional down-right diagonal moves for the current chess piece
-            public void downRightMove(Piece[,] board, String[] moves, String[] protectedSquares)
-            {
-                int startRow = this.row - 1;
-                int startCol = this.col + 1;
-                int movesNumber = ChessUtility.numOfCurrentMoves(moves);
-                int protectedSquaresCount = ChessUtility.numOfCurrentMoves(protectedSquares);
-                while (startRow >= 0 && startCol < 8)
-                {
-                    if (addSquareToPossibleMoves(board, startRow, startCol, moves, movesNumber, protectedSquares, protectedSquaresCount))
-                        movesNumber++;
-                    else
-                        break;
-                    startRow -= 1;
-                    startCol += 1;
-                }
-            }
-
-            // Convert a square position to String representation and add it to piece list
-            public void addPossibleMove(int currRow, int currCol, String[] moves, int count)
-            {
-                String pos = "";
-                char row = (char)(currRow + 48);
-                char col = (char)(currCol + 48);
-                pos += row;
-                pos += col;
-                moves[count] = pos;
+                    break;
+                currentRow += direction.RowIncrement;
+                currentColumn += direction.ColumnIncrement;
             }
         }
+
+        private class Direction
+        {
+            public static readonly Direction Up = new(1, 0);
+            public static readonly Direction Down = new(-1, 0);
+            public static readonly Direction Left = new(0, -1);
+            public static readonly Direction Right = new(0, 1);
+            public static readonly Direction UpLeft = new(1, -1);
+            public static readonly Direction UpRight = new(1, 1);
+            public static readonly Direction DownLeft = new(-1, -1);
+            public static readonly Direction DownRight = new(-1, 1);
+
+            private Direction(int rowIncrement, int columnIncrement)
+            {
+                RowIncrement = rowIncrement;
+                ColumnIncrement = columnIncrement;
+            }
+
+            public int RowIncrement { get; }
+            public int ColumnIncrement { get; }
+        }
+
+        // Convert a square position to string representation and add it to piece list
+        public void AddPossibleMove(int currRow, int currCol, string[] moves, int count)
+        {
+            string pos = "";
+            char row = (char)(currRow + 48);
+            char col = (char)(currCol + 48);
+            pos += row;
+            pos += col;
+            moves[count] = pos;
+        }
     }
+}
 

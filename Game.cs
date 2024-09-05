@@ -1,126 +1,80 @@
-using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Net.NetworkInformation;
-using System.Text;
-using System.Threading.Tasks;
-
-
 namespace ChessApp
 {
     internal class Game
     {
+        private const int BoardRows = 8;
+        private const int BoardCols = 8;
+
         // Fields
-        Piece[,] board;
-        int boardRows;
-        int boardCols;
-        private int gameMovesNumber;
-        private int positionsHistoryCounter;
-        private String currentPlayer;
-        private String lastMove;
-        private bool isCheck;
-        private bool isMate;
-        private bool drawOffer;
-        private bool lastMoveWasPlayed;
-        private StatusGame gameStatus;
-        private Piece whiteKing;
-        private Piece blackKing;
-        private String[] positionsHistory;
-        private int[] boardsRepetitionsCounter;
+        private Piece[,] _board;
+        private int _gameMovesNumber;
+        private int _positionsHistoryCounter;
+        private Color _currentPlayer;
+        private string _lastMove;
+        private bool _isCheck;
+        private bool _drawOffer;
+        private bool _lastMoveWasPlayed;
+        private StatusGame _gameStatus;
+        private Piece _whiteKing;
+        private Piece _blackKing;
+        private string[] _positionsHistory;
+        private int[] _boardsRepetitionsCounter;
+        private readonly PlayerPieces _whitePieces;
+        private readonly PlayerPieces _blackPieces;
 
         // Constructor
         public Game()
         {
             // Setting initial values to all game fields 
-            boardRows = 8;
-            boardCols = 8;
-            board = new Piece[boardRows, boardCols];
-            positionsHistory = new string[100];
-            boardsRepetitionsCounter = new int[100];
-            currentPlayer = "White";
-            gameStatus = StatusGame.InProgress;
-            isCheck = false;
-            isMate = false;
-            drawOffer = false;
-            lastMoveWasPlayed = true;
-            lastMove = "";
-            gameMovesNumber = 0;
-            positionsHistoryCounter = 0;
-            settingInitialBoard();
-            whiteKing = getKingFromBoard("White");
-            blackKing = getKingFromBoard("Black");
+            _board = new Piece[BoardRows, BoardCols];
+            _positionsHistory = new string[100];
+            _boardsRepetitionsCounter = new int[100];
+            _currentPlayer = Color.White;
+            _gameStatus = StatusGame.InProgress;
+            _isCheck = false;
+            _drawOffer = false;
+            _lastMoveWasPlayed = true;
+            _lastMove = "";
+            _gameMovesNumber = 0;
+            _positionsHistoryCounter = 0;
+            _whitePieces = new PlayerPieces(Color.White);
+            _blackPieces = new PlayerPieces(Color.Black);
+            _whiteKing = _whitePieces.King;
+            _blackKing = _blackPieces.King;
+            SettingInitialBoard();
         }
 
         // Setting the starting board position
-        public void settingInitialBoard()
+        public void SettingInitialBoard()
         {
-
-            addPieces(new Bishop("Bishop", "Black", 7, 5));
-            addPieces(new Bishop("Bishop", "White", 0, 5));
-            addPieces(new King("King", "Black", 7, 4));
-            addPieces(new Rook("Rook", "White", 0, 0));
-            addPieces(new Knight("Knight", "White", 0, 1));
-            addPieces(new Bishop("Bishop", "White", 0, 2));
-            addPieces(new Queen("Queen", "White", 0, 3));
-            addPieces(new King("King", "White", 0, 4));
-            addPieces(new Bishop("Bishop", "White", 0, 5));
-            addPieces(new Knight("Knight", "White", 0, 6));
-            addPieces(new Rook("Rook", "White", 0, 7));
-            addPieces(new Pawn("Pawn", "White", 1, 0));
-            addPieces(new Pawn("Pawn", "White", 1, 1));
-            addPieces(new Pawn("Pawn", "White", 1, 2));
-            addPieces(new Pawn("Pawn", "White", 1, 3));
-            addPieces(new Pawn("Pawn", "White", 1, 4));
-            addPieces(new Pawn("Pawn", "White", 1, 5));
-            addPieces(new Pawn("Pawn", "White", 1, 6));
-            addPieces(new Pawn("Pawn", "White", 1, 7));
-            addPieces(new Rook("Rook", "Black", 7, 0));
-            addPieces(new Knight("Knight", "Black", 7, 1));
-            addPieces(new Bishop("Bishop", "Black", 7, 2));
-            addPieces(new Queen("Queen", "Black", 7, 3));
-            addPieces(new King("King", "White", 0, 4));
-            addPieces(new King("King", "Black", 7, 4));
-            addPieces(new Bishop("Bishop", "Black", 7, 5));
-            addPieces(new Knight("Knight", "Black", 7, 6));
-            addPieces(new Rook("Rook", "Black", 7, 7));
-            addPieces(new Pawn("Pawn", "Black", 6, 0));
-            addPieces(new Pawn("Pawn", "Black", 6, 1));
-            addPieces(new Pawn("Pawn", "Black", 6, 2));
-            addPieces(new Pawn("Pawn", "Black", 6, 3));
-            addPieces(new Pawn("Pawn", "Black", 6, 4));
-            addPieces(new Queen("Queen", "Black", 7, 3));
-            addPieces(new Pawn("Pawn", "Black", 6, 5));
-            addPieces(new Pawn("Pawn", "Black", 6, 6));
-            addPieces(new Pawn("Pawn", "Black", 6, 7));
-            
+            AddPieces(_whitePieces);
+            AddPieces(_blackPieces);
         }
 
         // Getters + Setters to fields
         public Piece[,] getBoard()
         {
-            return board;
+            return _board;
         }
 
         public void setGameMovesCount(int num)
         {
-            this.gameMovesNumber = num;
+            this._gameMovesNumber = num;
         }
 
         public int getGameMovesCount()
         {
-            return this.gameMovesNumber;
+            return this._gameMovesNumber;
         }
 
         public String getLastMove()
         {
-            return lastMove;
+            return _lastMove;
         }
 
         public void setLastMove(String lastMove)
         {
-            this.lastMove = lastMove;
+            this._lastMove = lastMove;
         }
 
 
@@ -129,29 +83,29 @@ namespace ChessApp
         {
             bool playerDrawOfferStatus = false;
             Piece opponentKing;
-            String opponentPlayer = "";
+            Color opponentPlayer;
             printBoard();
             // Updating all pieces moves for the first turn
-            updateAllPiecesMoves(lastMove);
-            while (gameStatus == StatusGame.InProgress) // The game will progress until reaching draw or mate
+            updateAllPiecesMoves(_lastMove);
+            while (_gameStatus == StatusGame.InProgress) // The game will progress until reaching draw or mate
             {
-                opponentPlayer = getOpponentPlayer(currentPlayer);
+                opponentPlayer = getOpponentPlayer(_currentPlayer);
 
                 if (threeFoldScenario()) // Checking for draw by repetitions event
                     break;
 
-                if (staleMateScenario(currentPlayer)) // Checking for StaleMate event
+                if (staleMateScenario(_currentPlayer)) // Checking for StaleMate event
                     break;
 
                 // Player turn flow , from input stage until making the move on board
-                playerDrawOfferStatus = playerTurn(currentPlayer, drawOffer, "");
+                playerDrawOfferStatus = playerTurn(_currentPlayer, _drawOffer, "");
                 if (fiftyMovesScenario())  // Checking for 50 moves draw scenario
                     break;
                 else if (deadPositionScenario()) // Checking for draw by dead position
                     break;
                 else if (playerDrawOfferStatus) // Checking if draw was offered
                 {
-                    lastMoveWasPlayed = false;
+                    _lastMoveWasPlayed = false;
                     if (drawOfferScenario()) // Checking for draw by offer event 
                         break;
                 }
@@ -166,36 +120,44 @@ namespace ChessApp
                 }
                 else
                 {
-                    isCheck = false;
+                    _isCheck = false;
                 }
                 printBoard();
                 // switching players turns and get updated kings position
-                currentPlayer = getOpponentPlayer(currentPlayer);
-                whiteKing = getKingFromBoard("White");
-                blackKing = getKingFromBoard("Black");
-                
+                _currentPlayer = getOpponentPlayer(_currentPlayer);
+                _whiteKing = GetKingByColor(Color.White);
+                _blackKing = GetKingByColor(Color.Black);
+
             }
         }
 
 
 
         // Add piece to game board
-        public void addPieces(Piece addedPiece)
+        public void AddPiece(Piece addedPiece)
         {
-            board[addedPiece.getRow(), addedPiece.getCol()] = addedPiece;
+            _board[addedPiece.getRow(), addedPiece.getCol()] = addedPiece;
+        }
+
+        private void AddPieces(PlayerPieces playerPieces)
+        {
+            foreach (var piece in playerPieces.Peices)
+            {
+                AddPiece(piece);
+            }
         }
 
         // Get the opponent king of current player
         public Piece getOpponentKing()
         {
-            return (currentPlayer == "Black") ? whiteKing : blackKing;
+            return (_currentPlayer == Color.Black) ? _whiteKing : _blackKing;
         }
         // Get the opponent player , that is not his turn
-        public String getOpponentPlayer(String currentPlayer)
+        public Color getOpponentPlayer(Color currentPlayer)
         {
-            if (currentPlayer == "White")
-                return "Black";
-            return "White";
+            if (currentPlayer == Color.White)
+                return Color.Black;
+            return Color.White;
         }
 
         // check if the current game position is already existed 
@@ -203,7 +165,7 @@ namespace ChessApp
         {
             for (int i = 0; i < positionsCounter; i++)
             {
-                if (currentPos.Equals(positionsHistory[i]))
+                if (currentPos.Equals(_positionsHistory[i]))
                 {
                     return i;
                 }
@@ -212,54 +174,45 @@ namespace ChessApp
         }
 
         // Retrieve the king position of given player from b
-        public Piece getKingFromBoard(String color)
+        public Piece GetKingByColor(Color color)
         {
-            for (int i = 0; i < boardRows; i++)
-            {
-                for (int j = 0; j < boardCols; j++)
-                {
-                    Piece currPiece = board[i, j];
-                    if (currPiece != null && currPiece.getColor() == color && currPiece.getName() == "King")
-                    {
-                        return currPiece;
-                    }
-                }
-            }
-            return null;
+            return color == Color.White
+                ? _whitePieces.King
+                : _blackPieces.King;
         }
 
         // Convert the game board to String representation for threefold draw checks
         public String boardToString()
         {
             String boardStr = "";
-            boardStr += currentPlayer;
+            boardStr += _currentPlayer;
             boardStr += " _: ";
             for (int i = 0; i < 8; i++)
             {
                 for (int j = 0; j < 8; j++)
                 {
-                    Piece currPiece = board[i, j];
+                    Piece currPiece = _board[i, j];
                     if (currPiece == null)
                         boardStr += "-";
                     else
                     {
-                        boardStr += currPiece.getColor()[0];
-                        boardStr += currPiece.getName()[0];
+                        boardStr += currPiece.getColor().ToString()[0];
+                        boardStr += currPiece.getName().ToString()[0];
                     }
                 }
             }
             boardStr += "_Castling_";
-            boardStr += rightToCastle("White");
-            boardStr += rightToCastle("Black");
+            boardStr += rightToCastle(Color.White);
+            boardStr += rightToCastle(Color.Black);
             boardStr += "EnPassant_";
-            boardStr += addOptionalEnPassant("White");
-            boardStr += addOptionalEnPassant("Black");
+            boardStr += addOptionalEnPassant(Color.White);
+            boardStr += addOptionalEnPassant(Color.Black);
             return boardStr;
         }
 
 
         // Check if the given Rook is already moved
-        public bool isRookMovedAlready(Piece rook, String currPlayer)
+        public bool isRookMovedAlready(Piece rook, Color currPlayer)
         {
             if (rook != null)
             {
@@ -271,20 +224,20 @@ namespace ChessApp
 
 
         // Return which castling moves are optional for current player in string format
-        public String rightToCastle(String currPlayer)
+        public String rightToCastle(Color currPlayer)
         {
             String castlingStr = "";
             castlingStr += currPlayer + "_";
-            int rookRow = (currPlayer == "White") ? 0 : 7;
-            Piece theKing = getKingFromBoard(currPlayer);
+            int rookRow = (currPlayer == Color.White) ? 0 : 7;
+            Piece theKing = GetKingByColor(currPlayer);
             if (((King)theKing).getFirstMove() == false)
                 return castlingStr;
             else
             {
-                Piece queenSideRook = board[rookRow, 0];
+                Piece queenSideRook = _board[rookRow, 0];
                 if (isRookMovedAlready(queenSideRook, currPlayer))
                     castlingStr += "Long";
-                Piece kingSideRook = board[rookRow, 7];
+                Piece kingSideRook = _board[rookRow, 7];
                 if (isRookMovedAlready(kingSideRook, currPlayer))
                     castlingStr += "Short";
             }
@@ -303,7 +256,7 @@ namespace ChessApp
                     Piece p = theBoard[i, j];
                     if (p != null && p.getName() != "King")
                     {
-                        p.searchForPossibleMoves(p, theBoard, lastMove);
+                        p.SearchForPossibleMoves(p, theBoard, lastMove);
                     }
                 }
             }
@@ -312,9 +265,9 @@ namespace ChessApp
         // Update for each of the current pieces their possible moves
         public void updateAllPiecesMoves(String lastMove)
         {
-            updatePiecesPossibleMoves(board, lastMove);
-            whiteKing.searchForPossibleMoves(whiteKing, board, "");
-            blackKing.searchForPossibleMoves(blackKing, board, "");
+            updatePiecesPossibleMoves(_board, lastMove);
+            _whiteKing.SearchForPossibleMoves(_whiteKing, _board, "");
+            _blackKing.SearchForPossibleMoves(_blackKing, _board, "");
         }
 
 
@@ -326,7 +279,7 @@ namespace ChessApp
             Piece selectedPiece = getBoard()[baseRow, baseColumn];
             if (selectedPiece == null)
                 return false;
-            else if (selectedPiece.getColor() != currentPlayer)
+            else if (selectedPiece.getColor() != _currentPlayer)
                 return false;
             return true;
         }
@@ -341,7 +294,7 @@ namespace ChessApp
             if (selectedPiece != null)
             {
                 // Can not capture the enemy king
-                if (selectedPiece.getColor() == currentPlayer || selectedPiece.getName() == "King")
+                if (selectedPiece.getColor() == _currentPlayer || selectedPiece.getName() == "King")
                     return false;
             }
             return true;
@@ -358,9 +311,9 @@ namespace ChessApp
         // Get the requested move from user
         public String getUserInput()
         {
-            String userMsg = (drawOffer == true) ? " player type 'draw' to accept the offer, " +
+            String userMsg = (_drawOffer == true) ? " player type 'draw' to accept the offer, " +
             "or any legal move to refuse" : " player please enter a move or offer a draw :";
-            Console.WriteLine(currentPlayer + userMsg);
+            Console.WriteLine(_currentPlayer + userMsg);
             String userInput = Console.ReadLine();
             return userInput;
         }
@@ -422,17 +375,17 @@ namespace ChessApp
         public bool isThreeFoldDrawOccurred()
         {
             String currentPosition = boardToString();
-            int comparisonIndex = comparePositions(currentPosition, positionsHistoryCounter);
+            int comparisonIndex = comparePositions(currentPosition, _positionsHistoryCounter);
             if (comparisonIndex != -1)
             {
-                boardsRepetitionsCounter[comparisonIndex]++;
-                if (boardsRepetitionsCounter[comparisonIndex] == 2)
+                _boardsRepetitionsCounter[comparisonIndex]++;
+                if (_boardsRepetitionsCounter[comparisonIndex] == 2)
                     return true;
             }
             else
             {
-                positionsHistory[positionsHistoryCounter] = currentPosition;
-                positionsHistoryCounter++;
+                _positionsHistory[_positionsHistoryCounter] = currentPosition;
+                _positionsHistoryCounter++;
             }
             return false;
         }
@@ -441,7 +394,7 @@ namespace ChessApp
         // Handle a draw event with proper message
         public void drawGameEvents(String typeOfDraw)
         {
-            gameStatus = StatusGame.Draw;
+            _gameStatus = StatusGame.Draw;
             if (typeOfDraw == "ThreeFold")
                 Console.WriteLine("The game is draw , draw by repetition");
             else if (typeOfDraw == "Stalemate")
@@ -454,14 +407,14 @@ namespace ChessApp
             else if (typeOfDraw == "Offer") // draw by offer
             {
                 printBoard();
-                Console.WriteLine("The game is a draw , draw offer accepted by both players"); 
+                Console.WriteLine("The game is a draw , draw offer accepted by both players");
             }
-                
+
             else
             {
                 printBoard();
                 Console.WriteLine("The game is draw , 50 moves played without any pawn move or capturing");
-            } 
+            }
             Console.WriteLine("The game result is : 1/2 - 1/2");
         }
 
@@ -469,15 +422,15 @@ namespace ChessApp
         // Check if in the last turn a draw was offered or answered
         public bool drawOfferScenario()
         {
-            if (drawOffer)
+            if (_drawOffer)
             {
                 drawGameEvents("Offer");
                 return true;
             }
             else
             {
-                Console.WriteLine("Draw offer sent by " + currentPlayer + " player");
-                drawOffer = true;
+                Console.WriteLine("Draw offer sent by " + _currentPlayer + " player");
+                _drawOffer = true;
             }
             return false;
         }
@@ -486,23 +439,23 @@ namespace ChessApp
         // Check if player refused to draw offer
         public void refuseDrawOfferScenario()
         {
-            if (drawOffer)
+            if (_drawOffer)
             {
-                Console.WriteLine("Draw offer refused by " + currentPlayer + " player. The turn is" +
+                Console.WriteLine("Draw offer refused by " + _currentPlayer + " player. The turn is" +
                     " now going back to the second player");
-                lastMoveWasPlayed = false;
+                _lastMoveWasPlayed = false;
             }
             else
-                lastMoveWasPlayed = true;
-            drawOffer = false;
+                _lastMoveWasPlayed = true;
+            _drawOffer = false;
         }
 
         // Check if the current player is in stalemate  
-        public bool staleMateScenario(String currentPlayer)
+        public bool staleMateScenario(Color currentPlayer)
         {
-            if (isCheck == false)
+            if (_isCheck == false)
             {
-                if (playerHasAnyLegalMove(board, currentPlayer))
+                if (playerHasAnyLegalMove(_board, currentPlayer))
                 {
                     drawGameEvents("Stalemate");
                     return true;
@@ -514,7 +467,7 @@ namespace ChessApp
         // Check if the 50 moves rule was reached
         public bool fiftyMovesScenario()
         {
-            if (gameMovesNumber == 100)
+            if (_gameMovesNumber == 100)
             {
                 drawGameEvents("50");
                 return true;
@@ -538,7 +491,7 @@ namespace ChessApp
         public bool threeFoldScenario()
         {
             // Checking the current board position only when a actual move was done,ignoring draw offers.
-            if (lastMoveWasPlayed)
+            if (_lastMoveWasPlayed)
             {
                 if (isThreeFoldDrawOccurred())
                 {
@@ -567,7 +520,7 @@ namespace ChessApp
                         {
                             if (currPiece.getName() == pieceName)
                             {
-                                if (currPiece.getColor() == "White")
+                                if (currPiece.getColor() == Color.White)
                                     whitePieces++;
                                 else
                                     blackPieces++;
@@ -584,12 +537,12 @@ namespace ChessApp
 
 
         // Update if player is in check event
-        public bool checkScenario(Piece opponentKing, String opponentPlayer)
+        public bool checkScenario(Piece opponentKing, Color opponentPlayer)
         {
-            if (searchForCheck(board, opponentKing))
+            if (searchForCheck(_board, opponentKing))
             {
                 Console.WriteLine(opponentPlayer + " player is in check");
-                isCheck = true;
+                _isCheck = true;
                 return true;
             }
             return false;
@@ -624,28 +577,27 @@ namespace ChessApp
         }
 
         // Update if player got checkmate
-        public bool mateScenario(String opponentPlayer)
+        public bool mateScenario(Color opponentPlayer)
         {
-            if (playerHasAnyLegalMove(board, opponentPlayer))
+            if (playerHasAnyLegalMove(_board, opponentPlayer))
             {
-                isMate = true;
-                gameStatus = StatusGame.Win;
+                _gameStatus = StatusGame.Win;
                 printBoard();
-                Console.WriteLine("Checkmate! " + currentPlayer + " player you are the winner");
-                printIntegerGameResult(currentPlayer);
+                Console.WriteLine("Checkmate! " + _currentPlayer + " player you are the winner");
+                printIntegerGameResult(_currentPlayer);
                 return true;
             }
             return false;
         }
 
         // Print the game result in numeric version - 1:0 or 0:1
-        public void printIntegerGameResult(String gameWinner)
+        public void printIntegerGameResult(Color gameWinner)
         {
-            Console.WriteLine("Game result is - " + (gameWinner == "White" ? "1:0" : "0:1"));
+            Console.WriteLine("Game result is - " + (gameWinner == Color.White ? "1:0" : "0:1"));
         }
 
         // Check if player has any legal move based on current board and check event
-        public bool playerHasAnyLegalMove(Piece[,] theBoard, String currPlayer)
+        public bool playerHasAnyLegalMove(Piece[,] theBoard, Color currPlayer)
         {
             for (int i = 0; i < 8; i++) // iterate over the board looking for opponent pieces
             {
@@ -680,16 +632,16 @@ namespace ChessApp
         // In case of piece capturing or pawn move , we do not need to store all the previous boards
         public void resetBoardsHistory()
         {
-            positionsHistory = new string[100];
-            boardsRepetitionsCounter = new int[100];
-            positionsHistoryCounter = 0;
+            _positionsHistory = new string[100];
+            _boardsRepetitionsCounter = new int[100];
+            _positionsHistoryCounter = 0;
         }
 
         // Handle pawn promotion event with current player
         public void promotionDecision(Piece pawn)
         {
             bool validChoice;
-            String input;
+            string input;
             do
             {
                 validChoice = true;
@@ -700,22 +652,22 @@ namespace ChessApp
                 {
                     case "Queen":
                         {
-                            addPieces(new Queen("Queen", pawn.getColor(), pawn.getRow(), pawn.getCol()));
+                            AddPiece(new Queen(pawn.getColor(), pawn.getRow(), pawn.getCol()));
                             break;
                         }
                     case "Rook":
                         {
-                            addPieces(new Rook("Rook", pawn.getColor(), pawn.getRow(), pawn.getCol()));
+                            AddPiece(new Rook(pawn.getColor(), pawn.getRow(), pawn.getCol()));
                             break;
                         }
                     case "Knight":
                         {
-                            addPieces(new Knight("Knight", pawn.getColor(), pawn.getRow(), pawn.getCol()));
+                            AddPiece(new Knight(pawn.getColor(), pawn.getRow(), pawn.getCol()));
                             break;
                         }
                     case "Bishop":
                         {
-                            addPieces(new Bishop("Bishop", pawn.getColor(), pawn.getRow(), pawn.getCol()));
+                            AddPiece(new Bishop(pawn.getColor(), pawn.getRow(), pawn.getCol()));
                             break;
                         }
                     default:
@@ -725,10 +677,10 @@ namespace ChessApp
                         }
                 }
             } while (!validChoice);
-            int pieceRow = pawn.getRow()+1;
+            int pieceRow = pawn.getRow() + 1;
             int pieceCol = pawn.getCol();
-            int baseRow = currentPlayer == "White" ? pieceRow -1 : pieceRow +1;
-            String promotionMoveStr = "";
+            int baseRow = _currentPlayer == Color.White ? pieceRow - 1 : pieceRow + 1;
+            string promotionMoveStr = "";
             promotionMoveStr += baseRow;
             promotionMoveStr += pieceCol;
             promotionMoveStr += pieceRow;
@@ -739,26 +691,26 @@ namespace ChessApp
         // Check if last move was a pawn promotion
         public void promotion(Piece pawn)
         {
-            if ((pawn.getColor() == "White" && pawn.getRow() == 7) ||
-            (pawn.getColor() == "Black" && pawn.getRow() == 0))
+            if ((pawn.getColor() == Color.White && pawn.getRow() == 7) ||
+            (pawn.getColor() == Color.Black && pawn.getRow() == 0))
             {
                 promotionDecision(pawn);
             }
         }
 
         // Add all the available en Passant moves for current player in string format
-        public String addOptionalEnPassant(String currPlayer)
+        public String addOptionalEnPassant(Color currPlayer)
         {
             String enPassantStr = "";
             int enPassantRow, direction;
             String lastTurn = "";
-            enPassantRow = (currentPlayer == "White") ? 4 : 3;
-            direction = (currentPlayer == "White") ? 1 : -1;
+            enPassantRow = (_currentPlayer == Color.White) ? 4 : 3;
+            direction = (_currentPlayer == Color.White) ? 1 : -1;
             Piece targetPiece = null;
             enPassantStr += currPlayer + "_";
             for (int i = 0; i < 8; i++)
             {
-                Piece currPiece = board[enPassantRow, i];
+                Piece currPiece = _board[enPassantRow, i];
                 // optional en a passant capture,check if it is valid
                 if (currPiece is Pawn && currPiece.getColor() == currPlayer)
                 {
@@ -786,7 +738,7 @@ namespace ChessApp
         {
             // adding one to the base column when capturing to the right
             int captureDirection = (enPassantSide == "Right") ? 1 : -1;
-            targetPiece = board[enPassantRow, baseColumn + captureDirection];
+            targetPiece = _board[enPassantRow, baseColumn + captureDirection];
             lastTurn += ChessUtility.convertNumToFile(baseColumn);
             lastTurn += enPassantRow;
             lastTurn += ChessUtility.convertNumToFile(baseColumn + captureDirection);
@@ -798,10 +750,10 @@ namespace ChessApp
                 enPassantStr += "Right";
                 pawn.setRow(enPassantRow);
                 pawn.setCol(baseColumn);
-                addPieces(pawn);
-                board[enPassantRow + moveDirection, baseColumn + captureDirection] = null;
-                board[enPassantRow, baseColumn + captureDirection] = targetPiece;
-                updateAllPiecesMoves(lastMove);
+                AddPiece(pawn);
+                _board[enPassantRow + moveDirection, baseColumn + captureDirection] = null;
+                _board[enPassantRow, baseColumn + captureDirection] = targetPiece;
+                updateAllPiecesMoves(_lastMove);
             }
             return enPassantStr;
         }
@@ -841,13 +793,13 @@ namespace ChessApp
             Piece opponentPawn = getBoard()[baseRow, targetCol];
             makeSimulateMove(basePiece, null, baseRow, baseCol, targetRow, targetCol, true);
             updateAllPiecesMoves(currMove);
-            bool foundCheck = searchForCheck(board, getKingFromBoard(basePiece.getColor()));
+            bool foundCheck = searchForCheck(_board, GetKingByColor(basePiece.getColor()));
             if (foundCheck) // this move is not dealing with the check
             {
                 makeSimulateMoveBack(basePiece, null, targetRow, targetCol, baseRow, baseCol, opponentPawn);
                 //makeSimulateMove(basePiece, null, targetRow, targetCol, baseRow, baseCol, true);
                 //getBoard()[targetRow, targetCol] = null;
-                updateAllPiecesMoves(lastMove); // update the board pieces with the current possible moves
+                updateAllPiecesMoves(_lastMove); // update the board pieces with the current possible moves
                 return false;
             }
             return true;
@@ -874,7 +826,7 @@ namespace ChessApp
                     askForEnPassant = true;
                     opponentPawn = getBoard()[baseRow, targetCol];
                 }
-                    
+
             }
             makeSimulateMove(basePiece, null, baseRow, baseCol, targetRow, targetCol, askForEnPassant);
             moveStr += ChessUtility.convertNumToFile(baseCol);
@@ -882,7 +834,7 @@ namespace ChessApp
             moveStr += ChessUtility.convertNumToFile(targetCol);
             moveStr += (char)(targetRow + '0');
             updateAllPiecesMoves(moveStr);
-            bool foundCheck = searchForCheck(board, getKingFromBoard(basePiece.getColor()));
+            bool foundCheck = searchForCheck(_board, GetKingByColor(basePiece.getColor()));
             makeSimulateMoveBack(basePiece, targetPiece, targetRow, targetCol, baseRow, baseCol, opponentPawn);
 
             /*
@@ -892,7 +844,7 @@ namespace ChessApp
                 board[baseRow, targetCol] = opponentPawn;
             }
             */
-            updateAllPiecesMoves(lastMove);
+            updateAllPiecesMoves(_lastMove);
             if (foundCheck)
                 return false;
             return true;
@@ -905,7 +857,7 @@ namespace ChessApp
         {
             thePiece.setRow(targetRow);
             thePiece.setCol(targetColumn);
-            addPieces(thePiece);
+            AddPiece(thePiece);
             getBoard()[pieceRow, pieceColumn] = targetPiece;
             if (askForEnPassent)
                 getBoard()[pieceRow, targetColumn] = targetPiece;
@@ -919,15 +871,15 @@ namespace ChessApp
 
             thePiece.setRow(targetRow);
             thePiece.setCol(targetColumn);
-            addPieces(thePiece);
+            AddPiece(thePiece);
             getBoard()[pieceRow, pieceColumn] = targetPiece;
-            if(opponentPawn != null) // the tested move is enPassant
+            if (opponentPawn != null) // the tested move is enPassant
             {
                 getBoard()[targetRow, pieceColumn] = opponentPawn;
 
             }
         }
-        
+
         // Check if a simulate move by the king is valid
         public bool simulateKingMove(Piece basePiece, int targetRow, int targetCol, int baseRow,
            int baseCol, int currntKingCol, String currMove)
@@ -935,12 +887,12 @@ namespace ChessApp
             makeSimulateMove(basePiece, null, baseRow, currntKingCol, targetRow, targetCol, false);
             getBoard()[baseRow, currntKingCol] = null;
             updateAllPiecesMoves(currMove);
-            bool foundCheck = searchForCheck(board, getKingFromBoard(basePiece.getColor()));
+            bool foundCheck = searchForCheck(_board, GetKingByColor(basePiece.getColor()));
             if (foundCheck == true)
             {
                 // undo the previous move
                 makeSimulateMove(basePiece, null, targetRow, targetCol, baseRow, baseCol, false);
-                updateAllPiecesMoves(lastMove);
+                updateAllPiecesMoves(_lastMove);
                 return false;
             }
             return true;
@@ -953,7 +905,7 @@ namespace ChessApp
         {
             makeSimulateMove(pieceToMove, null, baseRow, baseColumn, targetRow, targetColumn, false);
             updateAllPiecesMoves(currentMove);
-            bool foundCheck = searchForCheck(board, getKingFromBoard(pieceToMove.getColor()));
+            bool foundCheck = searchForCheck(_board, GetKingByColor(pieceToMove.getColor()));
             if (foundCheck == true)
                 return false;
             return true;
@@ -979,7 +931,7 @@ namespace ChessApp
             int rookTargetColOffset = (isShortCastling == true) ? -1 : 1;
             Piece rook = getBoard()[baseRow, targetColumn + rookBaseColumnDifference];
             rook.setCol(targetColumn + rookTargetColOffset);
-            addPieces(rook);
+            AddPiece(rook);
             getBoard()[baseRow, targetColumn + rookBaseColumnDifference] = null;
             ((Rook)rook).setFirstMove(false);
         }
@@ -989,7 +941,7 @@ namespace ChessApp
         public bool castlingMoveScenario(Piece pieceToMove, int baseRow, int baseColumn, int targetRow
             , int targetColumn, int columnDifference, String currentMove, bool kingFirstMove)
         {
-            bool CheckStatus = searchForCheck(board, pieceToMove);
+            bool CheckStatus = searchForCheck(_board, pieceToMove);
 
             if (CheckStatus)
             {
@@ -1038,32 +990,32 @@ namespace ChessApp
         // Printing the current game board
         public void printBoard()
         {
-            printBoardFrame(boardRows, 'A');
+            printBoardFrame(BoardRows, 'A');
             Console.WriteLine("  -----------------------------------------");
             printPieces();
-            printBoardFrame(boardRows, 'A');
+            printBoardFrame(BoardRows, 'A');
         }
 
         // Helper function for printing the board and the pieces
         public void printPieces()
         {
-            for (int i = boardRows - 1; i >= 0; i--)
+            for (int i = BoardRows - 1; i >= 0; i--)
             {
                 Console.Write((i + 1) + " ");
-                for (int j = 0; j < boardRows; j++)
+                for (int j = 0; j < BoardRows; j++)
                 {
                     String pos = "";
                     Console.Write("| ");
-                    if (board[i, j] == null)
+                    if (_board[i, j] == null)
                     {
                         Console.Write("   ");
                         continue;
                     }
-                    Piece currPiece = board[i, j];
+                    Piece currPiece = _board[i, j];
                     if (currPiece != null)
                     {
-                        pos += currPiece.getColor()[0];
-                        pos += currPiece.getName()[0];
+                        pos += currPiece.getColor().ToString()[0];
+                        pos += currPiece.getName().ToString()[0];
                     }
                     Console.Write(pos + " ");
                 }
@@ -1096,7 +1048,7 @@ namespace ChessApp
 
 
         // Get valid input from player or draw response
-        public bool playerTurn(String currPlayer, bool drawOffer, String str)
+        public bool playerTurn(Color currPlayer, bool drawOffer, String str)
         {
             bool userInput = false;
             String move = "";
@@ -1121,9 +1073,9 @@ namespace ChessApp
                     Console.WriteLine("The target square is already occupied by your piece or by the enemy king." +
                         " Please try again");
                 }
-                else if (!pieceMoveIsAllowed(move, isCheck)) // handling check scenarios and pinned moves
+                else if (!pieceMoveIsAllowed(move, _isCheck)) // handling check scenarios and pinned moves
                 {
-                    if (isCheck)
+                    if (_isCheck)
                         Console.WriteLine("You have to respond to the check. Please try again");
                     else
                         Console.WriteLine("The selected piece cannot reach the target square. Please try again");
@@ -1131,7 +1083,7 @@ namespace ChessApp
                 else
                     userInput = true;
             }
-            lastMove = move;
+            _lastMove = move;
             return false;
         }
 
@@ -1153,7 +1105,7 @@ namespace ChessApp
                 resetBoardsHistory();
             }
             else
-                gameMovesNumber++;
+                _gameMovesNumber++;
         }
 
 
@@ -1204,7 +1156,7 @@ namespace ChessApp
                             columnDifference, move, kingFirstMove))
                         {
                             updateAllPiecesMoves(move);
-                            gameMovesNumber++;
+                            _gameMovesNumber++;
                             return true;
                         }
                         else
@@ -1223,7 +1175,7 @@ namespace ChessApp
                     makeSimulateMove(pieceToMove, targetPiece, targetRow, targetCol, baseRow, baseCol, false);
                     resetPiecesFirstMove(pieceToMove, pawnMove, kingFirstMove, rookFirstMove);
                     // update the board pieces with the current possible moves after simulate move
-                    updateAllPiecesMoves(lastMove);
+                    updateAllPiecesMoves(_lastMove);
                     return false;
                 }
                 // Simulated move is valid and saved in the board for the next turn
@@ -1235,6 +1187,58 @@ namespace ChessApp
                 }
             }
             return false;
+        }
+
+
+
+        private class PlayerPieces
+        {
+            public PlayerPieces(Color color)
+            {
+                Color = color;
+                var firstRow = color == Color.White ? 0 : 7;
+                var secondRow = color == Color.White ? 1 : 6;
+
+
+                King = new King(color, firstRow, 4);
+                Queen = new Queen(color, firstRow, 3);
+                Rooks = [
+                    new Rook(color, firstRow, 0),
+                    new Rook(color, firstRow, 7)
+                ];
+                Knights = [
+                    new Knight(color, firstRow, 1),
+                    new Knight(color, firstRow, 6)
+                ];
+                Bishops = [
+                    new Bishop(color, firstRow, 2),
+                    new Bishop(color, firstRow, 5)
+                ];
+
+                // I could have specify them like I did the other arrays, but linq is shorter.
+                Pawns = Enumerable.Range(0, 8)
+                    .Select(i => new Pawn(color, secondRow, i))
+                    .ToArray();
+
+                Peices = Rooks
+                    .Cast<Piece>()
+                    .Concat(Knights)
+                    .Concat(Bishops)
+                    .Concat(Pawns)
+                    .Append(King)
+                    .Append(Queen)
+                    .ToArray();
+            }
+
+            public Color Color { get; }
+            public King King { get; }
+            public Queen Queen { get; }
+            public Knight[] Knights { get; }
+            public Rook[] Rooks { get; }
+            public Bishop[] Bishops { get; }
+            public Pawn[] Pawns { get; }
+
+            public Piece[] Peices { get; }
         }
     }
 }

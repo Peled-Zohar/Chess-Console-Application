@@ -9,16 +9,16 @@ namespace ChessApp
     internal class Knight : Piece
     {
         // Field to track the maximum possible moves for the Knight
-        int maxPossibleMovesNumber;
+        int _maxPossibleMovesNumber;
 
         // Constructor to initialize the knight with name, color, row, and column
-        public Knight(string name, string color, int row, int col)
-            : base("Night", color, row, col)
+        public Knight(Color color, int row, int col)
+            : base(nameof(Knight), color, row, col)
         {
             // Setting initial values and maximum possible moves
-            this.maxPossibleMovesNumber = 8;
-            allPossibleMoves = new String[maxPossibleMovesNumber];
-            protectedPieces = new String[maxPossibleMovesNumber];
+            this._maxPossibleMovesNumber = 8;
+            _allPossibleMoves = new String[_maxPossibleMovesNumber];
+            ProtectedPieces = new String[_maxPossibleMovesNumber];
         }
 
 
@@ -36,18 +36,18 @@ namespace ChessApp
                 Piece currPiece = theBoard[currRow, currCol];
                 if (currPiece == null || currPiece.getColor() != basePiece.getColor())
                 {
-                    addPossibleMove(currRow, currCol, moves, movesSize);
+                    AddPossibleMove(currRow, currCol, moves, movesSize);
                 }
                 else
                 {
-                    addPossibleMove(currRow, currCol, protectedPieces, protectedMovesSize);
+                    AddPossibleMove(currRow, currCol, protectedPieces, protectedMovesSize);
                 }
             }
         }
 
 
         // Method to find all possible moves for the knight in the current game position
-        public override void searchForPossibleMoves(Piece basePiece, Piece[,] theBoard, String lastMove)
+        public override void SearchForPossibleMoves(Piece basePiece, Piece[,] theBoard, String lastMove)
             {
             int row = basePiece.getRow();
             int col = basePiece.getCol();
@@ -67,7 +67,7 @@ namespace ChessApp
 
             // Set possible moves and protected pieces
             basePiece.setAllPossibleMove(possibleMoves);
-            basePiece.setProtectedPieces(protectedPieces);
+            basePiece.ProtectedPieces = protectedPieces;
         }
     }
 

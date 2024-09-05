@@ -14,13 +14,13 @@ namespace ChessApp
 
 
         // Constructor to initialize the rook with name, color, row, and column
-        public Rook(String name, String color, int row, int col)
-            : base("Rook", color, row, col)
+        public Rook(Color color, int row, int col)
+            : base(nameof(Rook), color, row, col)
         {
             // Setting initial values and maximum possible moves
             this.maxPossibleMovesNumber = 14;
-            allPossibleMoves = new string[maxPossibleMovesNumber];
-            protectedPieces = new String[maxPossibleMovesNumber];
+            _allPossibleMoves = new string[maxPossibleMovesNumber];
+            ProtectedPieces = new String[maxPossibleMovesNumber];
             firstMove = true;
         }
 
@@ -38,21 +38,21 @@ namespace ChessApp
 
 
         // Method to find all possible moves for the rook in the current game position
-        public override void searchForPossibleMoves(Piece basePiece, Piece[,] theBoard, string lastMove)
+        public override void SearchForPossibleMoves(Piece basePiece, Piece[,] theBoard, string lastMove)
         {
             // Arrays to store possible moves and protected pieces
             string[] possibleMoves = new string[14];
             string[] protectedPieces = new string[14];
 
             // Calling move methods to find possible moves in all directions
-            basePiece.rightMove(theBoard, possibleMoves, protectedPieces);
-            basePiece.leftMove(theBoard, possibleMoves, protectedPieces);
-            basePiece.upMove(theBoard, possibleMoves, protectedPieces);
-            basePiece.downMove(theBoard, possibleMoves, protectedPieces);
+            basePiece.RightMove(theBoard, possibleMoves, protectedPieces);
+            basePiece.LeftMove(theBoard, possibleMoves, protectedPieces);
+            basePiece.UpMove(theBoard, possibleMoves, protectedPieces);
+            basePiece.DownMove(theBoard, possibleMoves, protectedPieces);
 
             // Setting the found moves and protected pieces
             basePiece.setAllPossibleMove(possibleMoves);
-            basePiece.setProtectedPieces(protectedPieces);
+            basePiece.ProtectedPieces = protectedPieces;
         }
     }
 
